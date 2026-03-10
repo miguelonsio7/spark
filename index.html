@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#111111">
+<title>Spark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & base ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #111;
+  color: #111;
+  touch-action: manipulation;
+}
+
+/* ── Design tokens ────────────────────────────────────── */
+:root {
+  --black:   #111111;
+  --white:   #FFFFFF;
+  --off:     #F7F5F2;
+  --mid:     #888888;
+  --light:   #DDDDDD;
+  --lighter: #F0EFED;
+  --red:     #C0392B;
+  --navy:    #1A5276;
+  --purple:  #6C3483;
+  --green:   #1E8449;
+  --spice-sweet: #1A5276;
+  --spice-warm:  #C0392B;
+  --spice-hot:   #7B1F1F;
+
+  /* safe area for notched phones */
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Screen system ────────────────────────────────────── */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(24px + var(--safe-top)) 24px calc(24px + var(--safe-bottom));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  transform: translateY(12px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+.screen.exit {
+  opacity: 0;
+  transform: translateY(-12px);
+  pointer-events: none;
+}
+
+/* ── Screen 1: Splash ─────────────────────────────────── */
+#screen-splash {
+  background: var(--black);
+  gap: 0;
+}
+.splash-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(64px, 18vw, 96px);
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: -2px;
+  line-height: 1;
+  text-align: center;
+}
+.splash-dot {
+  display: inline-block;
+  width: clamp(10px, 2.5vw, 14px);
+  height: clamp(10px, 2.5vw, 14px);
+  background: var(--white);
+  border-radius: 50%;
+  margin-left: 3px;
+  margin-bottom: clamp(8px, 2vw, 12px);
+  vertical-align: bottom;
+}
+.splash-tagline {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-top: 14px;
+  margin-bottom: 64px;
+  text-align: center;
+}
+.btn-play {
+  width: 100%;
+  max-width: 280px;
+  padding: 18px;
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-play:active { transform: scale(0.97); }
+
+/* ── Screen 2: Mode picker ────────────────────────────── */
+#screen-mode { background: var(--off); gap: 16px; }
+
+.screen-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 7vw, 36px);
+  font-weight: 900;
+  color: var(--black);
+  text-align: center;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.screen-sub {
+  font-size: 14px;
+  color: var(--mid);
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.mode-cards {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.mode-card {
+  width: 100%;
+  padding: 20px 22px;
+  border-radius: 16px;
+  border: 2px solid var(--light);
+  background: var(--white);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s;
+  position: relative;
+  overflow: hidden;
+}
+.mode-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--black);
+  opacity: 0;
+  transition: opacity 0.18s;
+  border-radius: 14px;
+}
+.mode-card.selected {
+  border-color: var(--black);
+  background: var(--black);
+}
+.mode-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 3px;
+  transition: color 0.18s;
+}
+.mode-card-desc {
+  font-size: 13px;
+  color: var(--mid);
+  font-weight: 500;
+  transition: color 0.18s;
+}
+.mode-card.selected .mode-card-title,
+.mode-card.selected .mode-card-desc { color: var(--white); }
+.mode-card.selected .mode-card-desc { color: rgba(255,255,255,0.5); }
+
+/* ── Screen 3: Spice level ────────────────────────────── */
+#screen-spice { background: var(--off); gap: 16px; }
+
+.spice-options {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.spice-card {
+  width: 100%;
+  padding: 18px 22px;
+  border-radius: 16px;
+  border: 2px solid var(--light);
+  background: var(--white);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s;
+}
+.spice-card-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 3px;
+  transition: color 0.18s;
+}
+.spice-card-desc {
+  font-size: 13px;
+  color: var(--mid);
+  font-weight: 500;
+  transition: color 0.18s;
+}
+.spice-card.selected[data-spice="sweet"]  { background: var(--spice-sweet); border-color: var(--spice-sweet); }
+.spice-card.selected[data-spice="warm"]   { background: var(--spice-warm);  border-color: var(--spice-warm);  }
+.spice-card.selected[data-spice="hot"]    { background: var(--spice-hot);   border-color: var(--spice-hot);   }
+.spice-card.selected .spice-card-label,
+.spice-card.selected .spice-card-desc { color: var(--white); }
+.spice-card.selected .spice-card-desc { color: rgba(255,255,255,0.55); }
+
+/* Shared nav buttons */
+.nav-row {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  gap: 10px;
+}
+.btn-back {
+  width: 52px; height: 52px;
+  border-radius: 100px;
+  border: 2px solid var(--light);
+  background: var(--white);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--black);
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+.btn-back:active { background: var(--lighter); }
+.btn-continue {
+  flex: 1;
+  padding: 16px;
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.15s;
+  opacity: 0.35;
+  pointer-events: none;
+}
+.btn-continue.ready {
+  opacity: 1;
+  pointer-events: all;
+}
+.btn-continue:active { transform: scale(0.97); }
+
+/* ── Screen 4: Game ───────────────────────────────────── */
+#screen-game {
+  background: var(--off);
+  justify-content: flex-start;
+  padding-top: calc(16px + var(--safe-top));
+  gap: 0;
+}
+
+/* Top bar */
+.game-topbar {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+.topbar-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--black);
+  letter-spacing: -0.5px;
+}
+.topbar-dot {
+  display: inline-block;
+  width: 5px; height: 5px;
+  background: var(--black);
+  border-radius: 50%;
+  margin-left: 1px;
+  margin-bottom: 3px;
+  vertical-align: bottom;
+}
+.topbar-meta {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mid);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.btn-menu {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--light);
+  background: var(--white);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  color: var(--black);
+  transition: border-color 0.15s;
+}
+
+/* Category filter row */
+.filter-scroll {
+  width: 100%;
+  max-width: 360px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  gap: 8px;
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.filter-scroll::-webkit-scrollbar { display: none; }
+.cat-pill {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1.5px solid var(--light);
+  background: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mid);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.cat-pill.active { background: var(--black); border-color: var(--black); color: var(--white); }
+
+/* Card stack wrapper */
+.card-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-area {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 5 / 7;
+}
+
+.card-ghost {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  border: 1.5px solid var(--light);
+  background: var(--white);
+}
+.card-ghost:nth-child(1) { transform: rotate(3deg) translateY(4px); opacity: 0.55; z-index: 1; }
+.card-ghost:nth-child(2) { transform: rotate(-2.5deg) translateY(7px); opacity: 0.3; z-index: 0; }
+
+.card-scene {
+  position: absolute;
+  inset: 0;
+  perspective: 1200px;
+  z-index: 10;
+  cursor: pointer;
+}
+.card-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-inner.flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: var(--white);
+  border: 1.5px solid var(--light);
+  box-shadow: 0 6px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+}
+
+/* Card back */
+.card-back {
+  transform: rotateY(180deg);
+  background: var(--black);
+  border-color: var(--black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.back-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 8vw, 40px);
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: -1px;
+}
+.back-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--white);
+  border-radius: 50%;
+  margin-left: 2px;
+  margin-bottom: 4px;
+  vertical-align: bottom;
+}
+.back-rule { width: 28px; height: 1px; background: rgba(255,255,255,0.15); }
+.back-hint {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* Card front */
+.card-front {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(18px, 5vw, 26px);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.card-category {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.card-number {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--light);
+}
+
+/* Minigame tag */
+.minigame-tag {
+  background: var(--lighter);
+  border-radius: 8px;
+  padding: 7px 12px;
+  margin-bottom: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--mid);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+}
+.minigame-tag.visible { display: flex; }
+
+/* Timer */
+.timer-display {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+  min-width: 32px;
+  text-align: right;
+}
+.timer-display.urgent { color: var(--red); }
+.btn-timer {
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-timer.running { background: var(--red); }
+.btn-timer.done    { background: var(--green); pointer-events: none; }
+
+.card-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.card-prompt {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(17px, 4.5vw, 22px);
+  font-weight: 700;
+  color: var(--black);
+  line-height: 1.5;
+}
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--lighter);
+  margin-top: 12px;
+}
+.card-tone {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--light);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Bottom controls */
+.game-controls {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  flex-shrink: 0;
+  padding-bottom: calc(8px + var(--safe-bottom));
+}
+.btn-prev, .btn-shuffle {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  border: 1.5px solid var(--light);
+  background: var(--white);
+  font-size: 17px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--black);
+  flex-shrink: 0;
+  transition: border-color 0.15s, transform 0.12s;
+}
+.btn-prev:active, .btn-shuffle:active { transform: scale(0.93); }
+.btn-next-card {
+  flex: 1;
+  padding: 16px;
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.12s;
+}
+.btn-next-card:active { transform: scale(0.97); }
+
+/* Progress bar */
+.progress-bar-row {
+  width: 100%;
+  max-width: 340px;
+  margin-top: 12px;
+  flex-shrink: 0;
+}
+.progress-track {
+  width: 100%;
+  height: 2px;
+  background: var(--light);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--black);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* Empty state */
+.empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  text-align: center;
+}
+.empty-state.visible { display: flex; }
+.empty-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--black);
+}
+.empty-sub { font-size: 14px; color: var(--mid); }
+
+/* Menu overlay */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+  display: flex;
+  align-items: flex-end;
+}
+.menu-overlay.open { opacity: 1; pointer-events: all; }
+.menu-sheet {
+  width: 100%;
+  background: var(--white);
+  border-radius: 24px 24px 0 0;
+  padding: 28px 24px calc(28px + var(--safe-bottom));
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.menu-overlay.open .menu-sheet { transform: translateY(0); }
+.menu-handle {
+  width: 36px; height: 4px;
+  background: var(--light);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.menu-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 4px;
+}
+.menu-btn {
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--off);
+  border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.menu-btn:active { background: var(--lighter); }
+.menu-btn.danger { color: var(--red); }
+
+/* ── Utility ──────────────────────────────────────────── */
+.hide { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 1: SPLASH
+════════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-splash">
+  <div class="splash-logo">Spark<span class="splash-dot"></span></div>
+  <div class="splash-tagline">A game for two</div>
+  <button class="btn-play" onclick="goTo('mode')">Play</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 2: MODE PICKER
+════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-mode">
+  <div class="screen-title">Who's playing?</div>
+  <div class="screen-sub">Choose your game mode.</div>
+
+  <div class="mode-cards">
+    <button class="mode-card" data-mode="couples" onclick="selectMode(this)">
+      <div class="mode-card-title">Couples</div>
+      <div class="mode-card-desc">Just the two of you — from sweet to spicy.</div>
+    </button>
+    <button class="mode-card" data-mode="family" onclick="selectMode(this)">
+      <div class="mode-card-title">Family</div>
+      <div class="mode-card-desc">All ages welcome. Keep it fun and clean.</div>
+    </button>
+    <button class="mode-card" data-mode="friends" onclick="selectMode(this)">
+      <div class="mode-card-title">Friends</div>
+      <div class="mode-card-desc">A group ready to laugh at themselves.</div>
+    </button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn-back" onclick="goTo('splash')">←</button>
+    <button class="btn-continue" id="btn-mode-continue" onclick="goTo('spice')">Continue</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 3: SPICE LEVEL
+════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-spice">
+  <div class="screen-title">Set the mood.</div>
+  <div class="screen-sub">How adventurous are you feeling tonight?</div>
+
+  <div class="spice-options">
+    <button class="spice-card" data-spice="sweet" onclick="selectSpice(this)">
+      <div class="spice-card-label">Keep it Sweet</div>
+      <div class="spice-card-desc">Lighthearted, fun, and wholesome.</div>
+    </button>
+    <button class="spice-card" data-spice="warm" onclick="selectSpice(this)">
+      <div class="spice-card-label">Turn it Up</div>
+      <div class="spice-card-desc">A little flirty, a little daring.</div>
+    </button>
+    <button class="spice-card" data-spice="hot" onclick="selectSpice(this)">
+      <div class="spice-card-label">Full Heat</div>
+      <div class="spice-card-desc">Adults only. You've been warned.</div>
+    </button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn-back" onclick="goTo('mode')">←</button>
+    <button class="btn-continue" id="btn-spice-continue" onclick="startGame()">Let's Play</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 4: GAME
+════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-game">
+
+  <!-- Top bar -->
+  <div class="game-topbar">
+    <div class="topbar-logo">Spark<span class="topbar-dot"></span></div>
+    <div class="topbar-meta" id="topbar-meta">Couples · Sweet</div>
+    <button class="btn-menu" onclick="openMenu()">···</button>
+  </div>
+
+  <!-- Category filter -->
+  <div class="filter-scroll">
+    <button class="cat-pill active" onclick="setCategory('all', this)">All</button>
+    <button class="cat-pill" onclick="setCategory('conversation', this)">Conversation</button>
+    <button class="cat-pill" onclick="setCategory('dare', this)">Dare</button>
+    <button class="cat-pill" onclick="setCategory('minigame', this)">Minigame</button>
+    <button class="cat-pill" onclick="setCategory('wildcard', this)">Wildcard</button>
+    <button class="cat-pill" onclick="setCategory('memory', this)">Memory</button>
+  </div>
+
+  <!-- Card -->
+  <div class="card-wrap">
+    <div class="card-area">
+      <div class="card-ghost"></div>
+      <div class="card-ghost"></div>
+
+      <div class="card-scene" id="cardScene" onclick="flipCard()">
+        <div class="card-inner" id="cardInner">
+
+          <div class="card-face card-back">
+            <div class="back-logo">Spark<span class="back-dot"></span></div>
+            <div class="back-rule"></div>
+            <div class="back-hint">Tap to reveal</div>
+          </div>
+
+          <div class="card-face card-front">
+            <div class="card-header">
+              <div class="card-category" id="cardCategory"></div>
+              <div class="card-number" id="cardNumber"></div>
+            </div>
+            <div class="minigame-tag" id="minigameTag">
+              <span id="minigameLabel"></span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="timer-display" id="timerDisplay"></span>
+                <button class="btn-timer" id="btnTimer" onclick="handleTimer(event)">Start</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="card-prompt" id="cardPrompt"></div>
+            </div>
+            <div class="card-footer">
+              <div class="card-tone" id="cardTone"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Empty state inside card area -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-title">No cards here.</div>
+        <div class="empty-sub">Try a different filter.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="game-controls">
+    <button class="btn-prev" onclick="prevCard()">←</button>
+    <button class="btn-next-card" onclick="nextCard()">Next Card</button>
+    <button class="btn-shuffle" onclick="shuffleDeck()">⇄</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-bar-row">
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MENU SHEET
+════════════════════════════════════════════════════════ -->
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenuOnBg(event)">
+  <div class="menu-sheet">
+    <div class="menu-handle"></div>
+    <div class="menu-title">Options</div>
+    <button class="menu-btn" onclick="shuffleDeck(); closeMenu()">Shuffle deck</button>
+    <button class="menu-btn" onclick="closeMenu(); goTo('mode')">Change mode</button>
+    <button class="menu-btn" onclick="closeMenu(); goTo('spice')">Change spice level</button>
+    <button class="menu-btn danger" onclick="closeMenu(); goTo('splash')">Exit game</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  CARD DATA
+// ══════════════════════════════════════════════════════════
+// spice: 'sweet' | 'warm' | 'hot'  (hot includes warm+sweet cards too)
+// timerSecs: seconds for built-in timer (minigames only)
+
+const CARDS = {
+  couples: [
+    // Conversation
+    { type:'conversation', spice:'sweet', tone:'Playful',  prompt:"What was your very first impression of me — and how wrong was it?" },
+    { type:'conversation', spice:'sweet', tone:'Light',    prompt:"If our relationship had a movie title, what would it be?" },
+    { type:'conversation', spice:'sweet', tone:'Light',    prompt:"What's a random skill you think I'd be surprisingly good at?" },
+    { type:'conversation', spice:'sweet', tone:'Deep',     prompt:"What's something small I do that secretly makes your day better?" },
+    { type:'conversation', spice:'sweet', tone:'Playful',  prompt:"If we could teleport anywhere for a spontaneous date right now — where are we going?" },
+    { type:'conversation', spice:'sweet', tone:'Deep',     prompt:"What's something about me that still surprises you?" },
+    { type:'conversation', spice:'sweet', tone:'Deep',     prompt:"What's one memory of us that you replay in your head sometimes?" },
+    { type:'conversation', spice:'warm',  tone:'Playful',  prompt:"What's the most attractive thing I do without realising it?" },
+    { type:'conversation', spice:'hot',   tone:'Spicy',    prompt:"Describe your ideal evening together — in full detail." },
+    // Dare
+    { type:'dare', spice:'sweet', tone:'Playful', prompt:"Hold eye contact with your partner for 10 seconds without laughing. Loser does the next dare." },
+    { type:'dare', spice:'sweet', tone:'Light',   prompt:"Dance with your partner for 20 seconds. No music. No excuses." },
+    { type:'dare', spice:'sweet', tone:'Playful', prompt:"Describe your partner as if you're introducing them in a romantic movie trailer. Full drama required." },
+    { type:'dare', spice:'warm',  tone:'Flirty',  prompt:"Send your partner a flirty text message while sitting right next to them. Read it aloud." },
+    { type:'dare', spice:'warm',  tone:'Flirty',  prompt:"Whisper something in your partner's ear that would make them smile for the rest of the night." },
+    { type:'dare', spice:'hot',   tone:'Spicy',   prompt:"Give your partner a 60-second back massage. No shortcuts." },
+    // Minigame
+    { type:'minigame', spice:'sweet', tone:'Silly',   timerSecs:60, minigame:'Sketch It',        prompt:"Draw your first date on paper or your phone. Your partner has to guess where you went." },
+    { type:'minigame', spice:'sweet', tone:'Silly',   timerSecs:30, minigame:'Mind Meld',         prompt:"Without talking, both write down your ideal lazy Sunday activity. Reveal at the same time — do they match?" },
+    { type:'minigame', spice:'sweet', tone:'Silly',   timerSecs:0,  minigame:'Hum It',            prompt:"Hum a song that reminds you of your relationship. Your partner has 3 guesses to name it." },
+    { type:'minigame', spice:'sweet', tone:'Silly',   timerSecs:0,  minigame:'Finish the Story',  prompt:"One partner starts: \"It was our most chaotic date ever — it began when…\" Alternate one sentence each for 6 rounds." },
+    { type:'minigame', spice:'sweet', tone:'Light',   timerSecs:0,  minigame:'Act It Out',        prompt:"Without speaking, act out how your partner looks when they're excited about something. They must agree or disagree." },
+    { type:'minigame', spice:'warm',  tone:'Silly',   timerSecs:60, minigame:'Sketch It',        prompt:"Draw what your partner looks like when they're trying to be romantic. They rate it out of 10." },
+    // Wildcard
+    { type:'wildcard', spice:'sweet', tone:'Light',   prompt:"The next card must be answered in your best dramatic movie voice." },
+    { type:'wildcard', spice:'sweet', tone:'Light',   prompt:"Reverse roles — the next prompt must be answered about yourself, not your partner." },
+    { type:'wildcard', spice:'warm',  tone:'Playful', prompt:"For the next two cards, both players must whisper every answer." },
+    { type:'wildcard', spice:'hot',   tone:'Spicy',   prompt:"Skip the next card and dare your partner to something instead. They can't say no." },
+    // Memory
+    { type:'memory', spice:'sweet', tone:'Playful', prompt:"What is your partner's most-used phrase? Say it out loud — they confirm or deny." },
+    { type:'memory', spice:'sweet', tone:'Playful', prompt:"What song reminds your partner most of your relationship? Write it down — then ask them." },
+    { type:'memory', spice:'sweet', tone:'Light',   prompt:"What is your partner's go-to comfort food? Write it down, then reveal." },
+    { type:'memory', spice:'warm',  tone:'Playful', prompt:"What does your partner find most attractive about you? Guess, then ask." },
+  ],
+
+  family: [
+    { type:'conversation', spice:'sweet', tone:'Light', prompt:"What's your favourite family memory from this past year?" },
+    { type:'conversation', spice:'sweet', tone:'Light', prompt:"If you could only eat one meal forever, what would it be and why?" },
+    { type:'conversation', spice:'sweet', tone:'Light', prompt:"If our family had a motto, what would it be?" },
+    { type:'conversation', spice:'sweet', tone:'Light', prompt:"What's the most surprising talent someone in this family has?" },
+    { type:'dare', spice:'sweet', tone:'Light', prompt:"Do your best impression of another family member. They must react honestly." },
+    { type:'dare', spice:'sweet', tone:'Silly', prompt:"Teach everyone your best made-up dance move. They must copy it." },
+    { type:'minigame', spice:'sweet', tone:'Silly', timerSecs:0,  minigame:'Act It Out',  prompt:"Without words, act out your favourite family vacation. Everyone guesses where." },
+    { type:'minigame', spice:'sweet', tone:'Silly', timerSecs:60, minigame:'Sketch It',   prompt:"Draw the family pet — or your dream family pet. Everyone votes on the best one." },
+    { type:'minigame', spice:'sweet', tone:'Silly', timerSecs:0,  minigame:'Hum It',      prompt:"Hum the theme song of a TV show the whole family watches. First to guess wins." },
+    { type:'wildcard', spice:'sweet', tone:'Silly', prompt:"Everyone must answer the next card in a funny accent." },
+    { type:'memory',   spice:'sweet', tone:'Light', prompt:"What's the funniest thing that has ever happened in this house?" },
+    { type:'memory',   spice:'sweet', tone:'Light', prompt:"Who in this family is most likely to become famous — and for what?" },
+  ],
+
+  friends: [
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What's the most embarrassing story about yourself you'd actually be willing to tell?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"Who in this group is most likely to become famous — and for what?" },
+    { type:'conversation', spice:'warm',  tone:'Playful', prompt:"What's one thing about your life right now that you'd never post on social media?" },
+    { type:'dare', spice:'sweet', tone:'Silly',   prompt:"Sing the chorus of the last song you listened to. Right now. No skipping." },
+    { type:'dare', spice:'warm',  tone:'Playful', prompt:"Text the most recent person in your contacts something complimentary. Send it." },
+    { type:'minigame', spice:'sweet', tone:'Silly', timerSecs:0,  minigame:'Mind Meld',  prompt:"Everyone writes who in the group would survive a zombie apocalypse longest. Reveal together." },
+    { type:'minigame', spice:'sweet', tone:'Silly', timerSecs:60, minigame:'Sketch It',  prompt:"Draw a portrait of the person to your left. They rate it out of 10." },
+    { type:'minigame', spice:'sweet', tone:'Silly', timerSecs:0,  minigame:'Act It Out', prompt:"Act out how this group would react in an emergency. No words." },
+    { type:'wildcard', spice:'sweet', tone:'Playful', prompt:"The next person to check their phone has to answer two cards back to back." },
+    { type:'wildcard', spice:'warm',  tone:'Playful', prompt:"Vote: who in the group has to answer the next card with brutal honesty?" },
+    { type:'memory',   spice:'sweet', tone:'Playful', prompt:"What's the first memory you have of someone else in this group?" },
+  ]
+};
+
+const CAT_COLORS = {
+  conversation: '#111111',
+  dare:         '#C0392B',
+  minigame:     '#1A5276',
+  wildcard:     '#6C3483',
+  memory:       '#1E8449'
+};
+
+// ══════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════
+let state = {
+  mode:       'couples',
+  spice:      'sweet',
+  category:   'all',
+  deck:       [],
+  index:      0,
+  flipped:    false,
+  animating:  false,
+  // timer
+  timerSecs:  0,
+  timerLeft:  0,
+  timerRunning: false,
+  timerInterval: null
+};
+
+// ══════════════════════════════════════════════════════════
+//  SCREEN NAVIGATION
+// ══════════════════════════════════════════════════════════
+
+// Reset onboarding screens to a clean state when revisiting them
+function resetOnboarding(id) {
+  if (id === 'splash' || id === 'mode' || id === 'spice') {
+    // Clear mode selection
+    document.querySelectorAll('.mode-card').forEach(b => b.classList.remove('selected'));
+    document.getElementById('btn-mode-continue').classList.remove('ready');
+    // Clear spice selection
+    document.querySelectorAll('.spice-card').forEach(b => b.classList.remove('selected'));
+    document.getElementById('btn-spice-continue').classList.remove('ready');
+    // Reset state
+    state.mode  = 'couples';
+    state.spice = 'sweet';
+  }
+  if (id === 'spice') {
+    // Coming back to spice from mode — only clear spice selection
+    document.querySelectorAll('.spice-card').forEach(b => b.classList.remove('selected'));
+    document.getElementById('btn-spice-continue').classList.remove('ready');
+    state.spice = 'sweet';
+  }
+}
+
+function goTo(id) {
+  // If going back into onboarding, clean slate
+  if (id === 'splash' || id === 'mode') resetOnboarding(id);
+  if (id === 'spice') {
+    document.querySelectorAll('.spice-card').forEach(b => b.classList.remove('selected'));
+    document.getElementById('btn-spice-continue').classList.remove('ready');
+    state.spice = 'sweet';
+  }
+
+  const current = document.querySelector('.screen.active');
+  if (current) {
+    current.classList.add('exit');
+    current.classList.remove('active');
+    setTimeout(() => current.classList.remove('exit'), 400);
+  }
+  const next = document.getElementById('screen-' + id);
+  if (next) {
+    setTimeout(() => { next.classList.add('active'); }, 50);
+  }
+}
+
+// Force back to splash if browser restores page from back/forward cache
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted) {
+    // Page was restored from bfcache — hard reset to splash
+    document.querySelectorAll('.screen').forEach(s => {
+      s.classList.remove('active', 'exit');
+    });
+    document.querySelectorAll('.mode-card').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.spice-card').forEach(b => b.classList.remove('selected'));
+    document.getElementById('btn-mode-continue').classList.remove('ready');
+    document.getElementById('btn-spice-continue').classList.remove('ready');
+    state.mode = 'couples'; state.spice = 'sweet';
+    document.getElementById('screen-splash').classList.add('active');
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+//  ONBOARDING
+// ══════════════════════════════════════════════════════════
+function selectMode(btn) {
+  document.querySelectorAll('.mode-card').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.mode = btn.dataset.mode;
+  document.getElementById('btn-mode-continue').classList.add('ready');
+}
+
+function selectSpice(btn) {
+  document.querySelectorAll('.spice-card').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.spice = btn.dataset.spice;
+  document.getElementById('btn-spice-continue').classList.add('ready');
+}
+
+function startGame() {
+  // Update topbar
+  const modeLabel  = state.mode.charAt(0).toUpperCase() + state.mode.slice(1);
+  const spiceLabel = { sweet:'Sweet', warm:'Warm', hot:'Hot' }[state.spice];
+  document.getElementById('topbar-meta').textContent = `${modeLabel} · ${spiceLabel}`;
+
+  // Reset category filter
+  state.category = 'all';
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('.cat-pill').classList.add('active');
+
+  buildDeck();
+  goTo('game');
+}
+
+// ══════════════════════════════════════════════════════════
+//  DECK LOGIC
+// ══════════════════════════════════════════════════════════
+const SPICE_LEVELS = { sweet: ['sweet'], warm: ['sweet','warm'], hot: ['sweet','warm','hot'] };
+
+function buildDeck() {
+  const base   = CARDS[state.mode] || CARDS.couples;
+  const levels = SPICE_LEVELS[state.spice];
+  let filtered = base.filter(c => levels.includes(c.spice));
+  if (state.category !== 'all') filtered = filtered.filter(c => c.type === state.category);
+  state.deck    = shuffle([...filtered]);
+  state.index   = 0;
+  state.flipped = false;
+  state.animating = false;
+  stopTimer();
+
+  const scene = document.getElementById('cardScene');
+  const inner = document.getElementById('cardInner');
+  const empty = document.getElementById('emptyState');
+
+  if (state.deck.length === 0) {
+    scene.style.visibility = 'hidden';
+    empty.classList.add('visible');
+    document.querySelector('.game-controls').style.opacity = '0.3';
+    document.querySelector('.game-controls').style.pointerEvents = 'none';
+    document.getElementById('progressFill').style.width = '0%';
+  } else {
+    scene.style.visibility = 'visible';
+    empty.classList.remove('visible');
+    document.querySelector('.game-controls').style.opacity = '1';
+    document.querySelector('.game-controls').style.pointerEvents = 'auto';
+    inner.classList.remove('flipped');
+    loadCard(0);
+  }
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function loadCard(index) {
+  const card = state.deck[index];
+  if (!card) return;
+
+  const catEl = document.getElementById('cardCategory');
+  catEl.textContent = card.type.charAt(0).toUpperCase() + card.type.slice(1);
+  catEl.style.color = CAT_COLORS[card.type] || '#111';
+
+  document.getElementById('cardPrompt').textContent = card.prompt;
+  document.getElementById('cardTone').textContent   = card.tone;
+  document.getElementById('cardNumber').textContent = `${index + 1} / ${state.deck.length}`;
+
+  const tag   = document.getElementById('minigameTag');
+  const label = document.getElementById('minigameLabel');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const btnTimer     = document.getElementById('btnTimer');
+
+  stopTimer();
+
+  if (card.minigame) {
+    label.textContent = card.minigame;
+    tag.classList.add('visible');
+    if (card.timerSecs > 0) {
+      state.timerSecs = card.timerSecs;
+      state.timerLeft = card.timerSecs;
+      timerDisplay.textContent = formatTime(card.timerSecs);
+      timerDisplay.classList.remove('urgent');
+      btnTimer.textContent = 'Start';
+      btnTimer.className   = 'btn-timer';
+      timerDisplay.style.display = 'inline';
+      btnTimer.style.display     = 'inline-block';
+    } else {
+      timerDisplay.style.display = 'none';
+      btnTimer.style.display     = 'none';
+    }
+  } else {
+    tag.classList.remove('visible');
+  }
+
+  const pct = ((index + 1) / state.deck.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ══════════════════════════════════════════════════════════
+//  CARD FLIP
+// ══════════════════════════════════════════════════════════
+function flipCard() {
+  if (state.animating) return;
+  state.animating = true;
+  const inner = document.getElementById('cardInner');
+  state.flipped = !state.flipped;
+  inner.classList.toggle('flipped', state.flipped);
+  setTimeout(() => { state.animating = false; }, 560);
+}
+
+// ══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════════
+function advance(delta) {
+  if (state.animating || state.deck.length === 0) return;
+  state.animating = true;
+  const inner = document.getElementById('cardInner');
+
+  const doAdvance = () => {
+    state.index = ((state.index + delta) % state.deck.length + state.deck.length) % state.deck.length;
+    state.flipped = false;
+    loadCard(state.index);
+    setTimeout(() => { state.animating = false; }, 60);
+  };
+
+  if (state.flipped) {
+    inner.classList.remove('flipped');
+    state.flipped = false;
+    setTimeout(doAdvance, 320);
+  } else {
+    doAdvance();
+  }
+}
+
+function nextCard()  { advance(1);  }
+function prevCard()  { advance(-1); }
+
+function shuffleDeck() {
+  if (state.animating) return;
+  const inner = document.getElementById('cardInner');
+  inner.classList.remove('flipped');
+  state.flipped = false;
+  state.deck = shuffle(state.deck);
+  state.index = 0;
+  stopTimer();
+  loadCard(0);
+}
+
+// ══════════════════════════════════════════════════════════
+//  CATEGORY FILTER
+// ══════════════════════════════════════════════════════════
+function setCategory(cat, btn) {
+  state.category = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  buildDeck();
+}
+
+// ══════════════════════════════════════════════════════════
+//  TIMER
+// ══════════════════════════════════════════════════════════
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return m > 0 ? `${m}:${s.toString().padStart(2,'0')}` : `${s}s`;
+}
+
+function handleTimer(e) {
+  e.stopPropagation(); // don't flip card
+  if (state.timerRunning) {
+    stopTimer();
+  } else {
+    startTimer();
+  }
+}
+
+function startTimer() {
+  if (state.timerLeft <= 0) {
+    state.timerLeft = state.timerSecs;
+  }
+  state.timerRunning = true;
+  const btn     = document.getElementById('btnTimer');
+  const display = document.getElementById('timerDisplay');
+  btn.textContent = 'Stop';
+  btn.className   = 'btn-timer running';
+
+  state.timerInterval = setInterval(() => {
+    state.timerLeft--;
+    display.textContent = formatTime(state.timerLeft);
+    if (state.timerLeft <= 10) display.classList.add('urgent');
+    if (state.timerLeft <= 0) {
+      stopTimer();
+      display.textContent = 'Done!';
+      btn.textContent = 'Done';
+      btn.className   = 'btn-timer done';
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+  state.timerInterval = null;
+  state.timerRunning  = false;
+  const btn = document.getElementById('btnTimer');
+  if (btn && !btn.classList.contains('done')) {
+    btn.textContent = state.timerLeft > 0 && state.timerLeft < state.timerSecs ? 'Resume' : 'Start';
+    btn.className   = 'btn-timer';
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  MENU SHEET
+// ══════════════════════════════════════════════════════════
+function openMenu()  { document.getElementById('menuOverlay').classList.add('open'); }
+function closeMenu() { document.getElementById('menuOverlay').classList.remove('open'); }
+function closeMenuOnBg(e) { if (e.target === e.currentTarget) closeMenu(); }
+</script>
+</body>
+</html>
