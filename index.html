@@ -189,7 +189,41 @@ body {
 .mode-card.selected .mode-card-desc { color: var(--white); }
 .mode-card.selected .mode-card-desc { color: rgba(255,255,255,0.5); }
 
-/* ── Screen 3: Spice level ────────────────────────────── */
+/* ── After Dark mode card ─────────────────────────────── */
+.mode-card.after-dark {
+  background: var(--black);
+  border-color: var(--black);
+  margin-top: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.mode-card.after-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(192,57,43,0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+.mode-card.after-dark .mode-card-title { color: var(--white); }
+.mode-card.after-dark .mode-card-desc  { color: rgba(255,255,255,0.45); }
+.mode-card.after-dark .mode-card-tag {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(192,57,43,0.9);
+  background: rgba(192,57,43,0.12);
+  border: 1px solid rgba(192,57,43,0.3);
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin-bottom: 8px;
+}
+.mode-card.after-dark.selected {
+  border-color: #C0392B;
+  box-shadow: 0 0 0 1px #C0392B;
+}
+.mode-card.after-dark.selected .mode-card-desc { color: rgba(255,255,255,0.55); }
 #screen-spice { background: var(--off); gap: 16px; }
 
 .spice-options {
@@ -399,6 +433,237 @@ body {
   transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card-inner.flipped { transform: rotateY(180deg); }
+/* Front starts rotated (hidden). Back is default visible face. */
+
+/* ── Card actions (Done / Skip) ───────────────────────── */
+.card-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 0 24px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.card-actions.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.btn-action {
+  flex: 1;
+  max-width: 140px;
+  padding: 12px 0;
+  border-radius: 50px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.btn-action:active { transform: scale(0.96); }
+.btn-skip {
+  background: transparent;
+  border: 1.5px solid var(--light);
+  color: var(--mid);
+}
+.btn-done {
+  background: var(--black);
+  color: var(--white);
+}
+
+/* ── Interstitial overlay ─────────────────────────────── */
+.interstitial-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.interstitial-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.interstitial-pulse {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  transform: scale(0);
+}
+.interstitial-overlay.visible .interstitial-pulse {
+  animation: pulseRing 0.7s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+}
+@keyframes pulseRing {
+  0%   { transform: scale(0);   opacity: 1; }
+  60%  { transform: scale(2.5); opacity: 0.4; }
+  100% { transform: scale(4);   opacity: 0; }
+}
+.interstitial-content {
+  text-align: center;
+  color: var(--white);
+  animation: fadeUpIn 0.4s 0.15s ease both;
+}
+@keyframes fadeUpIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.interstitial-emoji {
+  font-size: 52px;
+  margin-bottom: 20px;
+  line-height: 1;
+}
+.interstitial-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+.interstitial-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Topbar actions group ─────────────────────────────── */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-topbar-icon {
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 18px;
+  padding: 6px 8px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+  line-height: 1;
+}
+.btn-topbar-icon.active { opacity: 1; }
+.btn-topbar-icon:active { opacity: 0.5; }
+
+/* ── Filter drawer ────────────────────────────────────── */
+.filter-drawer {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.filter-drawer.open { max-height: 60px; }
+
+/* ── Card header right group ──────────────────────────── */
+.card-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-favorite {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  color: var(--mid);
+  transition: color 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-favorite.saved { color: var(--red); transform: scale(1.15); }
+.btn-favorite:active { transform: scale(0.9); }
+
+/* ── Finish session nudge ─────────────────────────────── */
+.finish-nudge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 24px;
+  font-size: 14px;
+  color: var(--mid);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.finish-nudge.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.btn-finish-nudge {
+  background: none;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+  cursor: pointer;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--black);
+}
+
+/* ── Recap screen ─────────────────────────────────────── */
+#screen-recap {
+  background: var(--black);
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding: calc(var(--safe-top) + 32px) 28px calc(var(--safe-bottom) + 32px);
+}
+.recap-wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 28px; }
+.recap-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--white); }
+.recap-dot { display: inline-block; width: 6px; height: 6px; background: var(--red); border-radius: 50%; margin-left: 2px; vertical-align: super; }
+.recap-headline { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--white); line-height: 1.1; }
+.recap-stats { display: flex; align-items: center; gap: 24px; }
+.recap-stat { display: flex; flex-direction: column; gap: 4px; }
+.recap-stat-number { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; color: var(--white); line-height: 1; }
+.recap-stat-label { font-size: 13px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; }
+.recap-stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.15); }
+.recap-highlight { background: rgba(255,255,255,0.07); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.recap-highlight-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); }
+.recap-highlight-prompt { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--white); line-height: 1.35; font-style: italic; }
+.recap-favs { display: flex; flex-direction: column; gap: 12px; }
+.recap-favs-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); }
+.recap-favs-list { display: flex; flex-direction: column; gap: 8px; }
+.recap-fav-item { background: rgba(255,255,255,0.06); border-radius: 12px; padding: 14px 16px; font-size: 15px; color: rgba(255,255,255,0.85); line-height: 1.4; }
+.recap-quip { font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; color: rgba(255,255,255,0.55); line-height: 1.4; }
+.recap-actions { display: flex; flex-direction: column; gap: 12px; padding-top: 4px; }
+.btn-recap-play { width: 100%; padding: 16px; background: var(--white); color: var(--black); border: none; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; cursor: pointer; }
+.btn-recap-home { width: 100%; padding: 14px; background: transparent; color: rgba(255,255,255,0.5); border: 1.5px solid rgba(255,255,255,0.15); border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; }
+
+/* ── Card back tagline variety ────────────────────────── */
+.card-back-tagline {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+@keyframes flyOutLeft {
+  0%   { transform: translateX(0)     rotate(0deg)   scale(1);   opacity: 1; }
+  100% { transform: translateX(-130%) rotate(-18deg) scale(0.85); opacity: 0; }
+}
+@keyframes flyOutRight {
+  0%   { transform: translateX(0)    rotate(0deg)  scale(1);   opacity: 1; }
+  100% { transform: translateX(130%) rotate(18deg) scale(0.85); opacity: 0; }
+}
+@keyframes riseFromBottom {
+  0%   { transform: translateY(60px) scale(0.92); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+.card-scene.fly-left  { animation: flyOutLeft  0.38s cubic-bezier(0.4, 0, 0.8, 0.6) forwards; pointer-events: none; }
+.card-scene.fly-right { animation: flyOutRight 0.38s cubic-bezier(0.4, 0, 0.8, 0.6) forwards; pointer-events: none; }
+.card-scene.rise      { animation: riseFromBottom 0.38s cubic-bezier(0.2, 0.8, 0.4, 1) forwards; }
 
 .card-face {
   position: absolute;
@@ -411,9 +676,8 @@ body {
   box-shadow: 0 6px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
 }
 
-/* Card back */
+/* Card back — no transform, visible by default */
 .card-back {
-  transform: rotateY(180deg);
   background: var(--black);
   border-color: var(--black);
   display: flex;
@@ -447,11 +711,71 @@ body {
   text-transform: uppercase;
 }
 
-/* Card front */
+/* Card front — rotated 180deg, hidden by default, revealed on .flipped */
 .card-front {
+  transform: rotateY(180deg);
   display: flex;
   flex-direction: column;
   padding: clamp(18px, 5vw, 26px);
+  overflow: hidden; /* clip the accent line */
+}
+/* Per-type accent line at top of card front */
+.card-front::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 18px 18px 0 0;
+  background: var(--card-accent, transparent);
+  transition: background 0.3s ease;
+}
+
+/* ── Session intro overlay ────────────────────────────── */
+.session-intro {
+  position: fixed;
+  inset: 0;
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  pointer-events: none;
+  opacity: 0;
+}
+.session-intro.show {
+  animation: introSequence 2.2s ease forwards;
+}
+@keyframes introSequence {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.session-intro-mode {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 16px;
+}
+.session-intro-line {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(26px, 7vw, 36px);
+  font-weight: 700;
+  color: var(--white);
+  text-align: center;
+  padding: 0 32px;
+  line-height: 1.25;
+  opacity: 0;
+  transform: translateY(12px);
+}
+.session-intro.show .session-intro-line {
+  animation: introLineIn 0.5s 0.25s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+}
+@keyframes introLineIn {
+  to { opacity: 1; transform: translateY(0); }
 }
 .card-header {
   display: flex;
@@ -688,7 +1012,7 @@ body {
 ════════════════════════════════════════════════════════ -->
 <div class="screen active" id="screen-splash">
   <div class="splash-logo">Spark<span class="splash-dot"></span></div>
-  <div class="splash-tagline">A game for two</div>
+  <div class="splash-tagline">Questions, dares &amp; sparks for date night.</div>
   <button class="btn-play" onclick="goTo('mode')">Play</button>
 </div>
 
@@ -711,6 +1035,11 @@ body {
     <button class="mode-card" data-mode="friends" onclick="selectMode(this)">
       <div class="mode-card-title">Friends</div>
       <div class="mode-card-desc">A group ready to laugh at themselves.</div>
+    </button>
+    <button class="mode-card after-dark" data-mode="afterdark" onclick="selectMode(this)">
+      <div class="mode-card-tag">Featured Pack</div>
+      <div class="mode-card-title">After Dark</div>
+      <div class="mode-card-desc">Intimate, charged, and a little dangerous.</div>
     </button>
   </div>
 
@@ -757,17 +1086,22 @@ body {
   <div class="game-topbar">
     <div class="topbar-logo">Spark<span class="topbar-dot"></span></div>
     <div class="topbar-meta" id="topbar-meta">Couples · Sweet</div>
-    <button class="btn-menu" onclick="openMenu()">···</button>
+    <div class="topbar-actions">
+      <button class="btn-topbar-icon" onclick="toggleFilterDrawer()" id="btnFilter" title="Filter">⊞</button>
+      <button class="btn-menu" onclick="openMenu()">···</button>
+    </div>
   </div>
 
-  <!-- Category filter -->
-  <div class="filter-scroll">
-    <button class="cat-pill active" onclick="setCategory('all', this)">All</button>
-    <button class="cat-pill" onclick="setCategory('conversation', this)">Conversation</button>
-    <button class="cat-pill" onclick="setCategory('dare', this)">Dare</button>
-    <button class="cat-pill" onclick="setCategory('minigame', this)">Minigame</button>
-    <button class="cat-pill" onclick="setCategory('wildcard', this)">Wildcard</button>
-    <button class="cat-pill" onclick="setCategory('memory', this)">Memory</button>
+  <!-- Filter drawer (hidden by default) -->
+  <div class="filter-drawer" id="filterDrawer">
+    <div class="filter-scroll">
+      <button class="cat-pill active" onclick="setCategory('all', this)">All</button>
+      <button class="cat-pill" onclick="setCategory('conversation', this)">Conversation</button>
+      <button class="cat-pill" onclick="setCategory('dare', this)">Dare</button>
+      <button class="cat-pill" onclick="setCategory('minigame', this)">Minigame</button>
+      <button class="cat-pill" onclick="setCategory('wildcard', this)">Wildcard</button>
+      <button class="cat-pill" onclick="setCategory('memory', this)">Memory</button>
+    </div>
   </div>
 
   <!-- Card -->
@@ -782,13 +1116,17 @@ body {
           <div class="card-face card-back">
             <div class="back-logo">Spark<span class="back-dot"></span></div>
             <div class="back-rule"></div>
-            <div class="back-hint">Tap to reveal</div>
+            <div class="back-hint" id="backHint">Tap to reveal</div>
+            <div class="card-back-tagline" id="backTagline"></div>
           </div>
 
           <div class="card-face card-front">
             <div class="card-header">
               <div class="card-category" id="cardCategory"></div>
-              <div class="card-number" id="cardNumber"></div>
+              <div class="card-header-right">
+                <button class="btn-favorite" id="btnFavorite" onclick="toggleFavorite(event)" title="Save card">♡</button>
+                <div class="card-number" id="cardNumber"></div>
+              </div>
             </div>
             <div class="minigame-tag" id="minigameTag">
               <span id="minigameLabel"></span>
@@ -823,6 +1161,18 @@ body {
     <button class="btn-shuffle" onclick="shuffleDeck()">⇄</button>
   </div>
 
+  <!-- Done / Skip actions (appear after card is flipped) -->
+  <div class="card-actions" id="cardActions">
+    <button class="btn-action btn-skip" onclick="skipCard()">Skip</button>
+    <button class="btn-action btn-done" onclick="doneCard()">Done ✓</button>
+  </div>
+
+  <!-- Finish session nudge (appears after ~15 cards) -->
+  <div class="finish-nudge" id="finishNudge">
+    <span>Good session tonight.</span>
+    <button class="btn-finish-nudge" onclick="finishSession()">Wrap up →</button>
+  </div>
+
   <!-- Progress -->
   <div class="progress-bar-row">
     <div class="progress-track">
@@ -833,16 +1183,79 @@ body {
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
+     SESSION INTRO OVERLAY
+════════════════════════════════════════════════════════ -->
+<div class="session-intro" id="sessionIntro">
+  <div class="session-intro-mode" id="sessionIntroMode"></div>
+  <div class="session-intro-line" id="sessionIntroLine"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     INTERSTITIAL SCREEN
+════════════════════════════════════════════════════════ -->
+<div class="interstitial-overlay" id="interstitialOverlay" onclick="dismissInterstitial()">
+  <div class="interstitial-pulse" id="interstitialPulse"></div>
+  <div class="interstitial-content">
+    <div class="interstitial-emoji" id="interstitialEmoji"></div>
+    <div class="interstitial-headline" id="interstitialHeadline"></div>
+    <div class="interstitial-sub">Tap to continue</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
      MENU SHEET
 ════════════════════════════════════════════════════════ -->
 <div class="menu-overlay" id="menuOverlay" onclick="closeMenuOnBg(event)">
   <div class="menu-sheet">
     <div class="menu-handle"></div>
     <div class="menu-title">Options</div>
+    <button class="menu-btn" onclick="closeMenu(); finishSession()">Finish session</button>
     <button class="menu-btn" onclick="shuffleDeck(); closeMenu()">Shuffle deck</button>
     <button class="menu-btn" onclick="closeMenu(); goTo('mode')">Change mode</button>
-    <button class="menu-btn" onclick="closeMenu(); goTo('spice')">Change spice level</button>
+    <button class="menu-btn" id="menuSpiceBtn" onclick="closeMenu(); goTo('spice')">Change spice level</button>
     <button class="menu-btn danger" onclick="closeMenu(); goTo('splash')">Exit game</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     RECAP SCREEN
+════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-recap">
+  <div class="recap-wrap">
+    <div class="recap-logo">Spark<span class="recap-dot"></span></div>
+    <div class="recap-headline">Tonight's session</div>
+
+    <div class="recap-stats">
+      <div class="recap-stat">
+        <div class="recap-stat-number" id="recapCardCount">0</div>
+        <div class="recap-stat-label">cards played</div>
+      </div>
+      <div class="recap-stat-divider"></div>
+      <div class="recap-stat">
+        <div class="recap-stat-number" id="recapFavCount">0</div>
+        <div class="recap-stat-label">saved</div>
+      </div>
+    </div>
+
+    <!-- Highlight card -->
+    <div class="recap-highlight" id="recapHighlight">
+      <div class="recap-highlight-label">Tonight's highlight</div>
+      <div class="recap-highlight-prompt" id="recapHighlightPrompt"></div>
+    </div>
+
+    <!-- Saved favorites list -->
+    <div class="recap-favs" id="recapFavs">
+      <div class="recap-favs-label">Saved cards</div>
+      <div class="recap-favs-list" id="recapFavsList"></div>
+    </div>
+
+    <!-- Closing quip -->
+    <div class="recap-quip" id="recapQuip"></div>
+
+    <div class="recap-actions">
+      <button class="btn-recap-play" onclick="startGame()">Play again</button>
+      <button class="btn-recap-home" onclick="goTo('splash')">Home</button>
+    </div>
   </div>
 </div>
 
@@ -864,6 +1277,16 @@ const CARDS = {
     { type:'conversation', spice:'sweet', tone:'Deep',     prompt:"What's something about me that still surprises you?" },
     { type:'conversation', spice:'sweet', tone:'Deep',     prompt:"What's one memory of us that you replay in your head sometimes?" },
     { type:'conversation', spice:'warm',  tone:'Playful',  prompt:"What's the most attractive thing I do without realising it?" },
+    { type:'conversation', spice:'warm',  tone:'Playful',  prompt:"What would you try in life if you knew nobody could judge you?" },
+    { type:'conversation', spice:'warm',  tone:'Light',    prompt:"If you had a completely free week just for yourself, how would you spend it?" },
+    { type:'conversation', spice:'warm',  tone:'Playful',  prompt:"What's a mistake you've made that still taught you something important?" },
+    { type:'conversation', spice:'warm',  tone:'Playful',  prompt:"What's something about yourself that most people don't get to see?" },
+    { type:'conversation', spice:'warm',  tone:'Playful',  prompt:"What memory always hits you with a strong feeling when it comes back?" },
+    { type:'conversation', spice:'warm',  tone:'Playful',  prompt:"If you could rewrite one chapter of your life, which one would it be?" },
+    { type:'conversation', spice:'warm',  tone:'Playful',  prompt:"What's something you wish people understood about what you need in a relationship?" },
+    { type:'conversation', spice:'warm',  tone:'Playful',  prompt:"What dream do you have that sometimes feels too big to say out loud?" },
+    { type:'conversation', spice:'warm',  tone:'Playful',  prompt:"What fear influences your decisions more than you'd like to admit?" },
+    { type:'conversation', spice:'warm',  tone:'Light',    prompt:"What question do you ask someone when you really want to understand who they are?" },
     { type:'conversation', spice:'hot',   tone:'Spicy',    prompt:"Describe your ideal evening together — in full detail." },
     // Dare
     { type:'dare', spice:'sweet', tone:'Playful', prompt:"Hold eye contact with your partner for 10 seconds without laughing. Loser does the next dare." },
@@ -889,6 +1312,106 @@ const CARDS = {
     { type:'memory', spice:'sweet', tone:'Playful', prompt:"What song reminds your partner most of your relationship? Write it down — then ask them." },
     { type:'memory', spice:'sweet', tone:'Light',   prompt:"What is your partner's go-to comfort food? Write it down, then reveal." },
     { type:'memory', spice:'warm',  tone:'Playful', prompt:"What does your partner find most attractive about you? Guess, then ask." },
+    // ── BATCH 1 ADDITIONS ─────────────────────────────────
+    // Conversation — sweet
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What tiny moment recently made you feel lucky to be together?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What personality trait of mine surprised you the most?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"If our relationship were a restaurant, what would be on the menu?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What simple thing instantly improves your mood?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What adventure would you love for us to try together?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What is something I do that you secretly find adorable?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What kind of trip would bring out the best in us as a couple?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What fictional couple reminds you most of us?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What little habit of mine makes you smile?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What would our relationship theme park ride be like?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What random place could secretly make a great date spot?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What moment from our relationship always makes you laugh?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What hobby do you think we would dominate as a couple?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What tradition should we start together?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What weather feels most like \"our vibe\"?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What food represents our relationship best?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What spontaneous thing should we try this year?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What do you think we do really well as a couple?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What song could be the soundtrack to our relationship?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What compliment do you secretly enjoy hearing?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What personality trait of yours do you think balances me out?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What is something small we do that feels special?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What everyday moment can feel romantic?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What new skill should we try learning together?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What random talent do you think I secretly have?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What memory of us deserves a movie scene?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What kind of house would match our personalities?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What adventure would our future selves thank us for taking?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What would our dream weekend look like?" },
+    { type:'conversation', spice:'sweet', tone:'Light',   prompt:"What kind of pet would match our relationship energy?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What is something you appreciate about me lately?" },
+    // Conversation — warm (escalation cards)
+    { type:'conversation', spice:'warm', tone:'Playful', prompt:"Share something you admire about your partner." },
+    { type:'conversation', spice:'warm', tone:'Playful', prompt:"Describe a moment when you felt really close to your partner." },
+    { type:'conversation', spice:'warm', tone:'Playful', prompt:"Tell your partner something they do that makes you feel loved." },
+    { type:'conversation', spice:'warm', tone:'Playful', prompt:"Share one thing you hope to experience together in the future." },
+    // Dare — sweet
+    { type:'dare', spice:'sweet', tone:'Playful', prompt:"Give your partner a dramatic movie-style compliment." },
+    { type:'dare', spice:'sweet', tone:'Light',   prompt:"Invent a ridiculous pet name for your partner." },
+    { type:'dare', spice:'sweet', tone:'Light',   prompt:"Describe your partner like you're introducing them on a dating show." },
+    { type:'dare', spice:'sweet', tone:'Playful', prompt:"Recreate your first hug with exaggerated drama." },
+    { type:'dare', spice:'sweet', tone:'Playful', prompt:"Give your partner a compliment using only three words." },
+    { type:'dare', spice:'sweet', tone:'Light',   prompt:"Hold hands until the next card is finished." },
+    { type:'dare', spice:'sweet', tone:'Playful', prompt:"Do your best slow-motion romantic walk toward your partner." },
+    { type:'dare', spice:'sweet', tone:'Light',   prompt:"Act like your partner's biggest fan for 15 seconds." },
+    { type:'dare', spice:'sweet', tone:'Playful', prompt:"Pretend you're giving a toast celebrating your partner." },
+    { type:'dare', spice:'sweet', tone:'Light',   prompt:"Give your partner a high-energy hype speech." },
+    { type:'dare', spice:'sweet', tone:'Playful', prompt:"Describe your partner using only compliments." },
+    // Dare — warm
+    { type:'dare', spice:'warm', tone:'Spicy',   prompt:"Say three things that make your partner irresistible." },
+    { type:'dare', spice:'warm', tone:'Playful', prompt:"Pretend you're meeting your partner for the first time. Flirt." },
+    { type:'dare', spice:'warm', tone:'Spicy',   prompt:"Tell your partner something about them that makes you blush." },
+    { type:'dare', spice:'warm', tone:'Spicy',   prompt:"Pull your partner closer and give them a compliment." },
+    { type:'dare', spice:'warm', tone:'Spicy',   prompt:"Say one thing about your partner you've never said out loud." },
+    // Minigame — sweet
+    { type:'minigame', spice:'sweet', tone:'Light',   timerSecs:60, minigame:'Sketch It',        prompt:"Draw your partner with your eyes closed." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:60, minigame:'Sketch It',        prompt:"Draw your dream vacation. Partner guesses." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:0,  minigame:'Act It Out',       prompt:"Act out your perfect date without speaking." },
+    { type:'minigame', spice:'sweet', tone:'Light',   timerSecs:0,  minigame:'Hum It',           prompt:"Hum a love song your partner must guess." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:30, minigame:'Rapid Round',      prompt:"Name five things your partner loves. You have 30 seconds." },
+    { type:'minigame', spice:'sweet', tone:'Light',   timerSecs:0,  minigame:'Act It Out',       prompt:"Act out your partner's morning routine." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:0,  minigame:'Fill the Blank',   prompt:"Fill in together: \"Our relationship is basically a ___ movie.\"" },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:0,  minigame:'Emoji Round',      prompt:"Describe your partner using only three emojis. They must guess the meaning." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:0,  minigame:'Act It Out',       prompt:"Act out a memory from your relationship. Partner must guess which one." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:60, minigame:'Sketch It',        prompt:"Draw the place you'd love to travel together." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:0,  minigame:'Mind Meld',        prompt:"Write down your partner's dream job. Reveal together — do they match?" },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:0,  minigame:'Finish the Story', prompt:"Build a silly love story one sentence at a time. 6 rounds." },
+    { type:'minigame', spice:'sweet', tone:'Light',   timerSecs:60, minigame:'Sketch It',        prompt:"Draw your partner as a cartoon character." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:0,  minigame:'Act It Out',       prompt:"Act out how your partner reacts to their morning coffee." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:0,  minigame:'Mind Meld',        prompt:"Write three places your partner wants to travel. Reveal — how many match?" },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:60, minigame:'Sketch It',        prompt:"Draw a symbol that represents your relationship." },
+    // Memory — sweet
+    { type:'memory', spice:'sweet', tone:'Playful', prompt:"What was your partner wearing when you first met? Guess, then ask." },
+    { type:'memory', spice:'sweet', tone:'Light',   prompt:"What is your partner's favourite movie genre? Write it, then ask." },
+    { type:'memory', spice:'sweet', tone:'Playful', prompt:"What song would your partner play on repeat right now? Guess, then ask." },
+    { type:'memory', spice:'sweet', tone:'Playful', prompt:"What is your partner's dream travel destination? Write it down, then reveal." },
+    { type:'memory', spice:'sweet', tone:'Light',   prompt:"What emoji does your partner use the most? Write it, then check their phone." },
+    { type:'memory', spice:'sweet', tone:'Light',   prompt:"What hobby does your partner enjoy most? Write it, then ask." },
+    // Wildcard — new
+    { type:'wildcard', spice:'sweet', tone:'Playful', prompt:"The next answer must include a compliment." },
+    { type:'wildcard', spice:'warm',  tone:'Spicy',   prompt:"For the next round, answers must be whispered." },
+    { type:'wildcard', spice:'sweet', tone:'Playful', prompt:"The next prompt must be answered while holding hands." },
+    { type:'wildcard', spice:'sweet', tone:'Light',   prompt:"Both players must answer the next question at the same time." },
+    { type:'wildcard', spice:'sweet', tone:'Light',   prompt:"The next player must answer using only three words." },
+    // ── SALVAGED FROM CHATGPT BATCH ───────────────────────
+    // Conversation — genuinely new angles
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What moment made you realize you really liked me?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What is something about me that you hope never changes?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What do you think our future selves will laugh about someday?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What is a moment from our relationship you wish you could relive?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What do you think makes our relationship different from others?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What do you think we'll still be doing together when we're old?" },
+    { type:'conversation', spice:'sweet', tone:'Playful', prompt:"What do you hope we'll always keep doing together?" },
+    { type:'conversation', spice:'warm',  tone:'Playful', prompt:"Tell your partner why someone would be lucky to date them." },
+    // Minigame — new scenarios
+    { type:'minigame', spice:'sweet', tone:'Light',   timerSecs:0,  minigame:'Act It Out', prompt:"Act out your partner trying to wake up early." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:20, minigame:'Sketch It',  prompt:"Both draw your dream house at the same time. Compare after 20 seconds." },
+    { type:'minigame', spice:'sweet', tone:'Playful', timerSecs:0,  minigame:'Act It Out', prompt:"Act out the most dramatic romantic scene you can imagine. No words." },
   ],
 
   family: [
@@ -918,6 +1441,55 @@ const CARDS = {
     { type:'wildcard', spice:'sweet', tone:'Playful', prompt:"The next person to check their phone has to answer two cards back to back." },
     { type:'wildcard', spice:'warm',  tone:'Playful', prompt:"Vote: who in the group has to answer the next card with brutal honesty?" },
     { type:'memory',   spice:'sweet', tone:'Playful', prompt:"What's the first memory you have of someone else in this group?" },
+  ],
+
+  afterdark: [
+    // Conversation — warm
+    { type:'conversation', spice:'hot', tone:'Open up',      prompt:"What is something I do that you find unintentionally sexy?" },
+    { type:'conversation', spice:'hot', tone:'Open up',      prompt:"When did you first think: this one is different?" },
+    { type:'conversation', spice:'hot', tone:'Open up',      prompt:"What is something you have never told me you find attractive about me?" },
+    { type:'conversation', spice:'hot', tone:'Open up',      prompt:"What is a fantasy you have that you have never said out loud?" },
+    { type:'conversation', spice:'hot', tone:'Open up',      prompt:"What is the most attractive version of me? Describe it." },
+    { type:'conversation', spice:'hot', tone:'Open up',      prompt:"If we had a whole night with no plans and no phones, what would you want to do?" },
+    { type:'conversation', spice:'hot', tone:'Open up',      prompt:"What is something I could do more of that would make you feel wanted?" },
+    { type:'conversation', spice:'hot', tone:'Open up',      prompt:"What is a side of yourself you only really let out with me?" },
+    // Conversation — hot
+    { type:'conversation', spice:'hot', tone:'Go there',     prompt:"What is something you have wanted to try with me but have not asked for yet?" },
+    { type:'conversation', spice:'hot', tone:'Go there',     prompt:"Describe the last time you found me irresistible. Do not skip the details." },
+    { type:'conversation', spice:'hot', tone:'Go there',     prompt:"What is a scenario you have thought about more than once?" },
+    { type:'conversation', spice:'hot', tone:'Go there',     prompt:"What does the ideal version of tonight look like to you?" },
+    { type:'conversation', spice:'hot', tone:'Go there',     prompt:"If you could change one thing about our physical relationship, what would it be?" },
+    { type:'conversation', spice:'hot', tone:'Go there',     prompt:"What is something you want me to do to you that you have never asked for directly?" },
+    { type:'conversation', spice:'hot', tone:'Go there',     prompt:"What part of your body do you most want me to pay attention to?" },
+    { type:'conversation', spice:'hot', tone:'Go there',     prompt:"Tell me about a time I turned you on without realising it." },
+    // Dare — warm
+    { type:'dare', spice:'hot', tone:'Make a move',          prompt:"Kiss your partner somewhere unexpected. Not the lips." },
+    { type:'dare', spice:'hot', tone:'Make a move',          prompt:"Without using words, show your partner exactly how you feel about them right now." },
+    { type:'dare', spice:'hot', tone:'Make a move',          prompt:"Look your partner in the eyes for 30 seconds without laughing or looking away." },
+    { type:'dare', spice:'hot', tone:'Make a move',          prompt:"Whisper something you genuinely find sexy about them. Right now, into their ear." },
+    { type:'dare', spice:'hot', tone:'Make a move',          prompt:"Take your partner's hand and trace something on their palm. They have to guess what." },
+    { type:'dare', spice:'hot', tone:'Make a move',          prompt:"Tell your partner exactly what you want to do later tonight. Out loud. No hinting." },
+    // Dare — hot
+    { type:'dare', spice:'hot', tone:'No holding back',      prompt:"Kiss your partner for at least 30 seconds. Properly." },
+    { type:'dare', spice:'hot', tone:'No holding back',      prompt:"Remove one item of your partner's clothing. Slowly." },
+    { type:'dare', spice:'hot', tone:'No holding back',      prompt:"Give your partner a compliment about their body. Be specific." },
+    { type:'dare', spice:'hot', tone:'No holding back',      prompt:"For the next two cards, your partner makes all the decisions." },
+    { type:'dare', spice:'hot', tone:'No holding back',      prompt:"Send your partner a voice note right now describing exactly what you are thinking." },
+    { type:'dare', spice:'hot', tone:'No holding back',      prompt:"Put your phone away, look at your partner, and say one thing you have been holding back." },
+    { type:'dare', spice:'hot', tone:'No holding back',      prompt:"Ask your partner to show you, without words, something they want from you tonight." },
+    { type:'dare', spice:'hot', tone:'No holding back',      prompt:"Describe in detail what you would do if you had your partner completely to yourself for 24 hours." },
+    // Memory
+    { type:'memory', spice:'hot', tone:'Look back',          prompt:"What is a moment between us that still makes you smile when you think about it?" },
+    { type:'memory', spice:'hot', tone:'Look back',          prompt:"Tell me about the first time you realised you were properly attracted to me." },
+    { type:'memory', spice:'hot', tone:'Look back',          prompt:"What is a trip or night out we had that you would want to do again, exactly?" },
+    { type:'memory', spice:'hot', tone:'Tell it all',        prompt:"What is the most memorable night we have had together? Walk me through it." },
+    { type:'memory', spice:'hot', tone:'Tell it all',        prompt:"Tell me about a time I surprised you in the best possible way." },
+    { type:'memory', spice:'hot', tone:'Tell it all',        prompt:"What is something we did early on that you would want to recreate tonight?" },
+    // Wildcard
+    { type:'wildcard', spice:'hot', tone:'Shake it up',      prompt:"Switch seats, switch energy. The quieter one leads the next three cards." },
+    { type:'wildcard', spice:'hot', tone:'Shake it up',      prompt:"Each of you write down one thing you want to happen tonight. Swap. No backing out." },
+    { type:'wildcard', spice:'hot', tone:'No rules',         prompt:"Tonight's rules just changed. Put the game down for 10 minutes. Come back if you want." },
+    { type:'wildcard', spice:'hot', tone:'No rules',         prompt:"No card. No prompt. Just look at your partner and do something." },
   ]
 };
 
@@ -927,6 +1499,15 @@ const CAT_COLORS = {
   minigame:     '#1A5276',
   wildcard:     '#6C3483',
   memory:       '#1E8449'
+};
+
+// Accent line colours per card type (subtle, not the full category colour)
+const CAT_ACCENTS = {
+  conversation: '#CCCCCC',   // light grey — calm, neutral
+  dare:         '#E8A090',   // soft red
+  minigame:     '#7BAFD4',   // soft blue
+  wildcard:     '#B39DDB',   // soft purple
+  memory:       '#81C995',   // soft green
 };
 
 // ══════════════════════════════════════════════════════════
@@ -979,6 +1560,7 @@ function goTo(id) {
     document.querySelectorAll('.spice-card').forEach(b => b.classList.remove('selected'));
     document.getElementById('btn-spice-continue').classList.remove('ready');
     state.spice = 'sweet';
+    updateSpiceOptions();
   }
 
   const current = document.querySelector('.screen.active');
@@ -1017,6 +1599,33 @@ function selectMode(btn) {
   btn.classList.add('selected');
   state.mode = btn.dataset.mode;
   document.getElementById('btn-mode-continue').classList.add('ready');
+
+  const continueBtn = document.getElementById('btn-mode-continue');
+  if (state.mode === 'family') {
+    continueBtn.textContent = "Let's Play";
+    continueBtn.onclick = () => { state.spice = 'sweet'; startGame(); };
+  } else if (state.mode === 'afterdark') {
+    continueBtn.textContent = "Let's Go";
+    continueBtn.onclick = () => { state.spice = 'hot'; startGame(); };
+  } else {
+    continueBtn.textContent = 'Continue';
+    continueBtn.onclick = () => goTo('spice');
+  }
+}
+
+function updateSpiceOptions() {
+  // Show/hide spice options based on mode
+  const warm = document.querySelector('.spice-card[data-spice="warm"]');
+  const hot  = document.querySelector('.spice-card[data-spice="hot"]');
+  if (state.mode === 'friends') {
+    // Friends: show warm but not hot
+    warm.style.display = '';
+    hot.style.display  = 'none';
+  } else {
+    // Couples: show all
+    warm.style.display = '';
+    hot.style.display  = '';
+  }
 }
 
 function selectSpice(btn) {
@@ -1028,9 +1637,12 @@ function selectSpice(btn) {
 
 function startGame() {
   // Update topbar
-  const modeLabel  = state.mode.charAt(0).toUpperCase() + state.mode.slice(1);
+  const modeLabels = { couples:'Couples', family:'Family', friends:'Friends', afterdark:'After Dark' };
   const spiceLabel = { sweet:'Sweet', warm:'Warm', hot:'Hot' }[state.spice];
-  document.getElementById('topbar-meta').textContent = `${modeLabel} · ${spiceLabel}`;
+  const modeLabel  = modeLabels[state.mode] || state.mode;
+  document.getElementById('topbar-meta').textContent = state.mode === 'afterdark'
+    ? 'After Dark'
+    : `${modeLabel} · ${spiceLabel}`;
 
   // Reset category filter
   state.category = 'all';
@@ -1038,7 +1650,15 @@ function startGame() {
   document.querySelector('.cat-pill').classList.add('active');
 
   buildDeck();
+  cardsCompleted   = 0;
+  interstitialUsed = [];
+  sessionFavorites = [];
+  scheduleNextInterstitial(0);
+  document.getElementById('finishNudge').classList.remove('visible');
+  refreshCardBack();
   goTo('game');
+  // Show warm intro overlay on top of the game screen
+  showSessionIntro();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1051,7 +1671,7 @@ function buildDeck() {
   const levels = SPICE_LEVELS[state.spice];
   let filtered = base.filter(c => levels.includes(c.spice));
   if (state.category !== 'all') filtered = filtered.filter(c => c.type === state.category);
-  state.deck    = shuffle([...filtered]);
+  state.deck    = buildSmartSequence([...filtered]);
   state.index   = 0;
   state.flipped = false;
   state.animating = false;
@@ -1093,6 +1713,12 @@ function loadCard(index) {
   catEl.textContent = card.type.charAt(0).toUpperCase() + card.type.slice(1);
   catEl.style.color = CAT_COLORS[card.type] || '#111';
 
+  // Apply per-type accent line
+  const cardFront = document.querySelector('.card-front');
+  if (cardFront) {
+    cardFront.style.setProperty('--card-accent', CAT_ACCENTS[card.type] || 'transparent');
+  }
+
   document.getElementById('cardPrompt').textContent = card.prompt;
   document.getElementById('cardTone').textContent   = card.tone;
   document.getElementById('cardNumber').textContent = `${index + 1} / ${state.deck.length}`;
@@ -1126,6 +1752,76 @@ function loadCard(index) {
 
   const pct = ((index + 1) / state.deck.length) * 100;
   document.getElementById('progressFill').style.width = pct + '%';
+  updateFavoriteButton();
+}
+
+// ══════════════════════════════════════════════════════════
+//  HAPTICS
+//  Uses the Vibration API where available (Android Chrome etc)
+// ══════════════════════════════════════════════════════════
+function haptic(pattern) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+// Patterns
+const HAPTIC = {
+  flip:        [8],          // light tap on card flip
+  favorite:    [10, 40, 10], // double pulse — save confirmation
+  interstitial:[20],         // single medium pulse
+  done:        [6],          // subtle done tap
+};
+
+// ══════════════════════════════════════════════════════════
+//  SESSION INTRO
+// ══════════════════════════════════════════════════════════
+const INTRO_LINES = {
+  couples: [
+    "Tonight's your night.",
+    "Put the phones down.",
+    "Just the two of you.",
+    "No wrong answers.",
+    "Make tonight count.",
+  ],
+  family: [
+    "Let's make some memories.",
+    "Everyone plays.",
+    "Time to get silly.",
+    "Family first.",
+  ],
+  friends: [
+    "No holding back.",
+    "Let's find out who you really are.",
+    "Things are about to get interesting.",
+    "Fair warning: no skipping.",
+  ],
+  afterdark: [
+    "Just the two of you. No rules.",
+    "The night is yours.",
+    "Leave nothing unsaid.",
+    "You asked for this.",
+    "This is where it gets good.",
+  ],
+};
+
+function showSessionIntro(onDone) {
+  const mode  = state.mode;
+  const lines = INTRO_LINES[mode] || INTRO_LINES.couples;
+  const line  = lines[Math.floor(Math.random() * lines.length)];
+  const modeLabel = mode.charAt(0).toUpperCase() + mode.slice(1) + ' Mode';
+
+  document.getElementById('sessionIntroMode').textContent = modeLabel;
+  document.getElementById('sessionIntroLine').textContent = line;
+
+  const el = document.getElementById('sessionIntro');
+  el.classList.remove('show');
+  void el.offsetWidth; // force reflow to restart animation
+  el.classList.add('show');
+
+  haptic(HAPTIC.interstitial);
+
+  setTimeout(() => {
+    el.classList.remove('show');
+    if (typeof onDone === 'function') onDone();
+  }, 2200);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1134,48 +1830,290 @@ function loadCard(index) {
 function flipCard() {
   if (state.animating) return;
   state.animating = true;
+  haptic(HAPTIC.flip);
   const inner = document.getElementById('cardInner');
   state.flipped = !state.flipped;
   inner.classList.toggle('flipped', state.flipped);
+  if (state.flipped) {
+    setTimeout(() => showCardActions(), 400);
+  } else {
+    hideCardActions();
+  }
   setTimeout(() => { state.animating = false; }, 560);
+}
+
+// ══════════════════════════════════════════════════════════
+//  SEQUENCING LOGIC
+//  Rules:
+//  - No more than 2 same card types in a row
+//  - Minigames/wildcards spread out (not front-loaded)
+//  - Interstitial every 4-5 cards (randomised in that window)
+// ══════════════════════════════════════════════════════════
+function buildSmartSequence(cards) {
+  // Shuffle all cards first
+  const all = shuffle([...cards]);
+
+  // Split into specials and regular
+  const special = all.filter(c => c.type === 'minigame' || c.type === 'wildcard');
+  const regular = all.filter(c => c.type !== 'minigame' && c.type !== 'wildcard');
+
+  // Build regular sequence with strict "no 2 same type in a row" rule
+  // using a priority queue approach: always pick the most-available type
+  // that isn't the same as the last placed card
+  const typeBuckets = {};
+  regular.forEach(c => {
+    if (!typeBuckets[c.type]) typeBuckets[c.type] = [];
+    typeBuckets[c.type].push(c);
+  });
+
+  const regularSeq = [];
+  let lastType = null;
+
+  while (Object.values(typeBuckets).some(b => b.length > 0)) {
+    // Find the largest bucket that isn't the same as lastType
+    const candidates = Object.entries(typeBuckets)
+      .filter(([t, b]) => b.length > 0 && t !== lastType)
+      .sort((a, b) => b[1].length - a[1].length);
+
+    if (candidates.length === 0) {
+      // Only one type left — must repeat, no choice
+      const fallback = Object.entries(typeBuckets).find(([,b]) => b.length > 0);
+      if (!fallback) break;
+      const card = fallback[1].shift();
+      regularSeq.push(card);
+      lastType = card.type;
+    } else {
+      const [type, bucket] = candidates[0];
+      const card = bucket.shift();
+      regularSeq.push(card);
+      lastType = card.type;
+    }
+  }
+
+  // Inject specials every 4-5 regular cards
+  const result = [];
+  let specialIdx = 0;
+  let regularCount = 0;
+  let nextSpecialAt = 4 + Math.floor(Math.random() * 2);
+
+  regularSeq.forEach(card => {
+    regularCount++;
+    result.push(card);
+    if (specialIdx < special.length && regularCount >= nextSpecialAt) {
+      result.push(special[specialIdx++]);
+      regularCount = 0;
+      nextSpecialAt = 4 + Math.floor(Math.random() * 2);
+    }
+  });
+
+  // Remaining specials at end
+  while (specialIdx < special.length) result.push(special[specialIdx++]);
+
+  return result;
+}
+
+// ══════════════════════════════════════════════════════════
+//  INTERSTITIAL SYSTEM
+// ══════════════════════════════════════════════════════════
+const INTERSTITIALS = [
+  { emoji: '🔥', headline: 'Heating up.' },
+  { emoji: '👀', headline: 'Plot twist incoming.' },
+  { emoji: '✨', headline: 'Getting interesting.' },
+  { emoji: '😬', headline: 'No skipping this one.' },
+  { emoji: '💫', headline: 'You\'re on a roll.' },
+  { emoji: '🎯', headline: 'This one\'s a good one.' },
+  { emoji: '🫶', headline: 'Stay with it.' },
+  { emoji: '⚡', headline: 'Things just shifted.' },
+  { emoji: '🌙', headline: 'The night is young.' },
+  { emoji: '🎲', headline: 'Shake it up.' },
+];
+
+const BACK_HINTS = [
+  'Tap to reveal',
+  'Ready?',
+  'For both of you.',
+  'No dodging.',
+  'This one\'s good.',
+  'One question.',
+];
+
+let interstitialNextAt = 0;  // card index to show next interstitial
+let interstitialUsed   = []; // track which interstitials shown
+let cardsCompleted     = 0;  // count of done/skip actions
+
+function scheduleNextInterstitial(fromIndex) {
+  // Trigger between card 4-5 (i.e. after 4 or 5 completions)
+  const gap = 4 + Math.floor(Math.random() * 2);
+  interstitialNextAt = fromIndex + gap;
+}
+
+function showInterstitial(onDone) {
+  // Pick unused interstitial, reset if exhausted
+  if (interstitialUsed.length >= INTERSTITIALS.length) interstitialUsed = [];
+  const available = INTERSTITIALS.filter((_,i) => !interstitialUsed.includes(i));
+  const pick = available[Math.floor(Math.random() * available.length)];
+  const pickIdx = INTERSTITIALS.indexOf(pick);
+  interstitialUsed.push(pickIdx);
+
+  document.getElementById('interstitialEmoji').textContent    = pick.emoji;
+  document.getElementById('interstitialHeadline').textContent = pick.headline;
+
+  const overlay = document.getElementById('interstitialOverlay');
+  const pulse   = document.getElementById('interstitialPulse');
+
+  // Reset pulse animation
+  pulse.style.animation = 'none';
+  void pulse.offsetWidth;
+  pulse.style.animation = '';
+
+  overlay.classList.add('visible');
+  overlay._onDone = onDone;
+  haptic(HAPTIC.interstitial);
+
+  // Auto-dismiss after 2.8s if not tapped
+  overlay._autoDismiss = setTimeout(() => dismissInterstitial(), 2800);
+}
+
+function dismissInterstitial() {
+  const overlay = document.getElementById('interstitialOverlay');
+  clearTimeout(overlay._autoDismiss);
+  overlay.classList.remove('visible');
+  if (typeof overlay._onDone === 'function') {
+    overlay._onDone();
+    overlay._onDone = null;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  CARD BACK VARIETY
+// ══════════════════════════════════════════════════════════
+function refreshCardBack() {
+  const hint = BACK_HINTS[Math.floor(Math.random() * BACK_HINTS.length)];
+  const hintEl    = document.getElementById('backHint');
+  const taglineEl = document.getElementById('backTagline');
+  if (hintEl) hintEl.textContent = hint;
+  // Only show tagline occasionally for breathing room
+  if (taglineEl) taglineEl.textContent = Math.random() > 0.5 ? 'For both of you.' : '';
+}
+
+// ══════════════════════════════════════════════════════════
+//  DONE / SKIP ACTIONS
+// ══════════════════════════════════════════════════════════
+function showCardActions() {
+  document.getElementById('cardActions').classList.add('visible');
+}
+function hideCardActions() {
+  document.getElementById('cardActions').classList.remove('visible');
+}
+
+function doneCard() {
+  cardsCompleted++;
+  checkNudge();
+  hideCardActions();
+  _advanceWithInterstitial(1);
+}
+
+function skipCard() {
+  cardsCompleted++;
+  checkNudge();
+  hideCardActions();
+  _advanceWithInterstitial(1);
+}
+
+function _advanceWithInterstitial(delta) {
+  if (cardsCompleted > 0 && cardsCompleted >= interstitialNextAt) {
+    scheduleNextInterstitial(cardsCompleted);
+    showInterstitial(() => advance(delta));
+  } else {
+    advance(delta);
+  }
 }
 
 // ══════════════════════════════════════════════════════════
 //  NAVIGATION
 // ══════════════════════════════════════════════════════════
+function nextCard() {
+  cardsCompleted++;
+  checkNudge();
+  _advanceWithInterstitial(1);
+}
+function prevCard() { advance(-1); }
+
 function advance(delta) {
   if (state.animating || state.deck.length === 0) return;
+  hideCardActions();
   state.animating = true;
+  const scene = document.getElementById('cardScene');
   const inner = document.getElementById('cardInner');
+  const flyClass = delta > 0 ? 'fly-left' : 'fly-right';
 
-  const doAdvance = () => {
-    state.index = ((state.index + delta) % state.deck.length + state.deck.length) % state.deck.length;
-    state.flipped = false;
-    loadCard(state.index);
-    setTimeout(() => { state.animating = false; }, 60);
+  const doFlyOut = () => {
+    if (state.flipped) {
+      inner.style.transition = 'none';
+      inner.classList.remove('flipped');
+      state.flipped = false;
+      void inner.offsetWidth;
+      inner.style.transition = '';
+    }
+
+    scene.classList.add(flyClass);
+
+    setTimeout(() => {
+      scene.classList.remove(flyClass);
+      state.index = ((state.index + delta) % state.deck.length + state.deck.length) % state.deck.length;
+      loadCard(state.index);
+      refreshCardBack();
+
+      scene.classList.add('rise');
+      setTimeout(() => {
+        scene.classList.remove('rise');
+        state.animating = false;
+      }, 400);
+    }, 360);
   };
 
-  if (state.flipped) {
-    inner.classList.remove('flipped');
-    state.flipped = false;
-    setTimeout(doAdvance, 320);
-  } else {
-    doAdvance();
-  }
+  doFlyOut();
 }
-
-function nextCard()  { advance(1);  }
-function prevCard()  { advance(-1); }
 
 function shuffleDeck() {
   if (state.animating) return;
+  state.animating = true;
+  const scene = document.getElementById('cardScene');
   const inner = document.getElementById('cardInner');
-  inner.classList.remove('flipped');
-  state.flipped = false;
-  state.deck = shuffle(state.deck);
-  state.index = 0;
-  stopTimer();
-  loadCard(0);
+
+  // Snap flip back instantly if needed
+  if (state.flipped) {
+    inner.style.transition = 'none';
+    inner.classList.remove('flipped');
+    state.flipped = false;
+    void inner.offsetWidth;
+    inner.style.transition = '';
+  }
+
+  scene.classList.add('fly-left');
+  setTimeout(() => {
+    scene.classList.remove('fly-left');
+    state.deck = shuffle(state.deck);
+    state.index = 0;
+    stopTimer();
+    loadCard(0);
+    scene.classList.add('rise');
+    setTimeout(() => {
+      scene.classList.remove('rise');
+      state.animating = false;
+    }, 400);
+  }, 360);
+}
+
+
+// ══════════════════════════════════════════════════════════
+//  FILTER DRAWER
+// ══════════════════════════════════════════════════════════
+function toggleFilterDrawer() {
+  const drawer = document.getElementById('filterDrawer');
+  const btn    = document.getElementById('btnFilter');
+  const isOpen = drawer.classList.toggle('open');
+  btn.classList.toggle('active', isOpen);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1187,6 +2125,113 @@ function setCategory(cat, btn) {
   btn.classList.add('active');
   buildDeck();
 }
+
+// ══════════════════════════════════════════════════════════
+//  FAVORITES
+// ══════════════════════════════════════════════════════════
+let sessionFavorites = []; // { prompt, type }
+
+function toggleFavorite(e) {
+  e.stopPropagation(); // don't flip the card
+  const card = state.deck[state.index];
+  if (!card) return;
+  const btn = document.getElementById('btnFavorite');
+  const existingIdx = sessionFavorites.findIndex(f => f.prompt === card.prompt);
+  if (existingIdx >= 0) {
+    sessionFavorites.splice(existingIdx, 1);
+    btn.textContent = '♡';
+    btn.classList.remove('saved');
+  } else {
+    sessionFavorites.push({ prompt: card.prompt, type: card.type });
+    btn.textContent = '♥';
+    btn.classList.add('saved');
+    haptic(HAPTIC.favorite);
+    // Brief bounce feedback
+    btn.style.transform = 'scale(1.4)';
+    setTimeout(() => { btn.style.transform = ''; }, 200);
+  }
+}
+
+function updateFavoriteButton() {
+  const card = state.deck[state.index];
+  const btn  = document.getElementById('btnFavorite');
+  if (!card || !btn) return;
+  const saved = sessionFavorites.some(f => f.prompt === card.prompt);
+  btn.textContent = saved ? '♥' : '♡';
+  btn.classList.toggle('saved', saved);
+}
+
+// ══════════════════════════════════════════════════════════
+//  FINISH SESSION NUDGE (after ~15 cards)
+// ══════════════════════════════════════════════════════════
+const NUDGE_THRESHOLD = 15;
+
+function checkNudge() {
+  if (cardsCompleted === NUDGE_THRESHOLD) {
+    document.getElementById('finishNudge').classList.add('visible');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  RECAP SCREEN
+// ══════════════════════════════════════════════════════════
+const RECAP_QUIPS = [
+  "Not bad for a Tuesday.",
+  "This is why you don't need Netflix.",
+  "Your future selves will remember tonight.",
+  "Better than scrolling.",
+  "Same time next week?",
+  "Still going strong.",
+  "That's one for the memory box.",
+  "Worth staying up for.",
+];
+
+function finishSession() {
+  // Hide nudge
+  document.getElementById('finishNudge').classList.remove('visible');
+
+  // Stats
+  document.getElementById('recapCardCount').textContent = cardsCompleted;
+  document.getElementById('recapFavCount').textContent  = sessionFavorites.length;
+
+  // Highlight card — prefer a favorite, else pick a random played card
+  const highlightCard = sessionFavorites.length > 0
+    ? sessionFavorites[Math.floor(Math.random() * sessionFavorites.length)]
+    : state.deck[Math.floor(Math.random() * Math.min(cardsCompleted, state.deck.length))];
+
+  const highlightEl = document.getElementById('recapHighlight');
+  if (highlightCard) {
+    document.getElementById('recapHighlightPrompt').textContent = highlightCard.prompt || highlightCard;
+    highlightEl.style.display = 'flex';
+  } else {
+    highlightEl.style.display = 'none';
+  }
+
+  // Favorites list
+  const favsSection = document.getElementById('recapFavs');
+  const favsList    = document.getElementById('recapFavsList');
+  if (sessionFavorites.length > 0) {
+    favsList.innerHTML = '';
+    sessionFavorites.forEach(f => {
+      const item = document.createElement('div');
+      item.className = 'recap-fav-item';
+      item.textContent = f.prompt;
+      favsList.appendChild(item);
+    });
+    favsSection.style.display = 'flex';
+    // Hide highlight if it's the same as the first fav
+    if (sessionFavorites.length === 1) highlightEl.style.display = 'none';
+  } else {
+    favsSection.style.display = 'none';
+  }
+
+  // Quip
+  document.getElementById('recapQuip').textContent =
+    RECAP_QUIPS[Math.floor(Math.random() * RECAP_QUIPS.length)];
+
+  goTo('recap');
+}
+
 
 // ══════════════════════════════════════════════════════════
 //  TIMER
@@ -1243,9 +2288,77 @@ function stopTimer() {
 // ══════════════════════════════════════════════════════════
 //  MENU SHEET
 // ══════════════════════════════════════════════════════════
-function openMenu()  { document.getElementById('menuOverlay').classList.add('open'); }
+function openMenu() {
+  // Hide spice option for family (no spice levels apply)
+  document.getElementById('menuSpiceBtn').style.display =
+    (state.mode === 'family' || state.mode === 'afterdark') ? 'none' : '';
+  document.getElementById('menuOverlay').classList.add('open');
+}
 function closeMenu() { document.getElementById('menuOverlay').classList.remove('open'); }
 function closeMenuOnBg(e) { if (e.target === e.currentTarget) closeMenu(); }
+
+// ══════════════════════════════════════════════════════════
+//  SWIPE DETECTION
+//  - Swipe left  → next card
+//  - Swipe right → previous card
+//  - Short horizontal movement (< threshold) → treated as tap → flip
+//  - Vertical swipes are ignored so page scrolling still works
+// ══════════════════════════════════════════════════════════
+(function initSwipe() {
+  const SWIPE_THRESHOLD   = 50;  // min px horizontal to count as a swipe
+  const VERTICAL_LIMIT    = 80;  // if vertical movement exceeds this, ignore (user is scrolling)
+  const SWIPE_LOCK_MS     = 400; // ignore swipes while card is animating
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+  let isSwiping = false;
+
+  const scene = document.getElementById('cardScene');
+
+  scene.addEventListener('touchstart', function(e) {
+    const t = e.changedTouches[0];
+    touchStartX    = t.clientX;
+    touchStartY    = t.clientY;
+    touchStartTime = Date.now();
+    isSwiping      = false;
+  }, { passive: true });
+
+  scene.addEventListener('touchmove', function(e) {
+    const t = e.changedTouches[0];
+    const dx = Math.abs(t.clientX - touchStartX);
+    const dy = Math.abs(t.clientY - touchStartY);
+    // If clearly horizontal, mark as swiping and prevent page scroll
+    if (dx > dy && dx > 10) {
+      isSwiping = true;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  scene.addEventListener('touchend', function(e) {
+    if (state.animating) return;
+
+    const t  = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    // Ignore if primarily vertical (scrolling intent)
+    if (absDy > VERTICAL_LIMIT && absDy > absDx) return;
+
+    if (isSwiping && absDx >= SWIPE_THRESHOLD) {
+      // Horizontal swipe — navigate
+      if (dx < 0) {
+        nextCard();  // swipe left = next
+      } else {
+        prevCard();  // swipe right = previous
+      }
+    }
+    // If not a swipe, the onclick handler on cardScene fires the flip naturally
+    isSwiping = false;
+  }, { passive: true });
+})();
 </script>
 </body>
 </html>
